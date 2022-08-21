@@ -1,0 +1,31 @@
+program(decls) ::= declaration*:decls .
+
+declaration^ ::= ( var_decl^ ";" | func_decl^ | type_decl^ ) .
+
+var_decl(storage_class, type, name, value) ::= ("extern" | "static" | "auto" | "register" | " " ):storage_class type:type "\w":name [ "=" expr:value ] .
+
+type(signed, type, ref, arr_size) ::= (("unsigned" | "signed"):signed ["int"]:type | ("unsigned" | "signed"):signed ("long" | "short" | "char"):type | "char":type | "\w":type) (["*"*:ref] | "[" "\i":arr_size "]") .
+
+func_decl(type, name, args, definition) ::= ["static"] type:type "\w":name "(" [ "\w"*:args ] ")" (";" | block_structure:definition) .
+
+block_structure(statements) ::= "{" statement*:statements "}" .
+
+statement ::= ((var_decl | assignment_statement | func_call_statement) ";" | func_decl | if_statement | while_statement | do_statement).
+
+type_decl(type, name) ::= "typedef" type:type "\w":name .
+
+assignment_statement(lexpr, rexpr) ::= expr:rexpr "=" expr:rexpr .
+
+func_call_statement(name, args) ::= "\w":name "(" [ "\w"*:args ] ")" .
+
+if_statement(condition, true_block, else_if_blocks, false_block) ::= "if" "(" expr:condition ")" block_structure:true_block [else_if_block*:else_if_blocks] ["else" block_structure:false_block] .
+
+else_if_block(condition, block) ::= "else" "if" "(" expr:condition ")" block_structure:block .
+
+while_statement(condition, block) ::= "while" "(" expr:condition ")" block_structure:block .
+
+do_statement(condition, block) ::= "do" block_structure:block "while" "(" expr:condition ")" .
+
+expr ::= term .
+term ::= factor .
+factor ::= "\i" .

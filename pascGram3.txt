@@ -1,0 +1,30 @@
+Program(Name, Block) ::= <PROGRAM> <IDENTIFIER>:Name <SEMICOLON> Block:Block <DOT> .
+
+Block(Decls, Compound) ::= Declaration*:Decls Compound:Compound .
+
+Declaration^ ::= (VarDecl^ | ProcDecl^) <SEMICOLON> .
+
+VarDecl(Ids, Type) ::= <VAR> <IDENTIFIER>+:Ids <COLON> <IDENTIFIER>:Type .
+
+ProcDecl(Name, Block) ::= <PROCEDURE> <IDENTIFIER>:Name [ <OPAREN>   <CPAREN> ] <SEMICOLON>
+		 	 Block:Block .
+
+Compound(Statements) ::= <BEGIN> Statement*:Statements <END> .
+
+Statement^ ::= (CompoundStatement^ | AssignmentStatement^ | ProcCallStatement^)
+		   	   <SEMICOLON> .
+
+CompoundStatement(Statements) ::= <BEGIN> Statement*:Statements <END> .
+
+AssignmentStatement(Var, Expr) ::= <IDENTIFIER>:Var <ASSIGN> Expr:Expr .
+
+ProcCallStatement(ProcName, Args) ::= <IDENTIFIER>:ProcName <OPAREN> Expr*:Args <CPAREN> .
+
+Expr ::= (Term | Term (<PLUS> | <MINUS>) Expr) .
+
+Term ::= (Factor | Factor ( <DIVISION> | <PRODUCT> | <MOD> ) Term) .
+
+Factor ::= ( <INT_LITERAL>
+            | <FLOAT_LITERAL>
+            | <PLUS> Factor
+            | <MINUS> Factor ) .

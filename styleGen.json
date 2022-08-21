@@ -1,0 +1,58 @@
+{
+	"globalNamespace": "",
+	"pch": "pscpch.hpp",
+	"parserHeader": "Parser.hpp",
+	"parserSource": "Parser.cpp",
+	"lexerHeader": "Lexer.hpp",
+	"lexerSource": "Lexer.cpp",
+	"ASTHeader": "AST.hpp",
+	"visitorHeader": "Visitor.hpp",
+	"namespace": "Pascal",
+	"tab": "    ",
+	"abstractNode": "Node",
+	
+	"nodeNamePattern": {
+		"namespace" : "AST",
+		"prefix": "",
+		"postfix": "Node"
+	},
+	
+	"memberPattern": {
+		"prefix": "m_",
+		"postfix": ""
+	},
+	
+	"nodeType": {
+		"prefix": "std::unique_ptr<",
+		"postfix": ">"
+	},
+	
+	"temporaryVarPattern": {
+		"prefix": "t_",
+		"postfix": ""
+	},
+
+	"parserClassName": "Parser",
+	"parserMethodPattern": { 
+		"prefix": "parse",
+		"postfix": ""
+	},
+	"parserRequire": "require",
+	"parserMatch": "match",
+	"parserMatching": "matching",
+	"parserCurrentToken": "currentToken",
+	"parserPreviousToken": "previousToken",
+	"parserPosition": "ParserPos",
+	"parserTokens": "Tokens",
+
+	"tokenTypeEnumName": "TokenType",
+	"tokenType": "Token_t",
+	"tokenTypeRef": "Token",
+	"tokenListType": "TokenList",
+	"nullToken": "nullToken",
+
+	"containerPattern": {
+		"prefix": "std::vector<",
+		"postfix": ">"
+	}
+}

@@ -1,0 +1,11 @@
+Program(Name, Block) ::= <PROGRAM> <IDENTIFIER>:Name <SEMICOLON> Block:Block <DOT> .
+
+Block(decls, Compound) ::= Declaration+:decls Compound:Compound .
+
+Declaration ::= (VarDecl | ProcDecl) <SEMICOLON> .
+
+VarDecl(Token) ::= <VAR> <IDENTIFIER>:Token .
+
+ProcDecl(Name, Block) ::= <PROCEDURE> <IDENTIFIER>:Name <SEMICOLON> Block:Block .
+
+Compound ::= <BEGIN> <IDENTIFIER> <END> .

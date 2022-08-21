@@ -1,0 +1,56 @@
+{
+	"globalNamespace": "",
+	"pch": "cpch.hpp",
+	"parserHeader": "parser.hpp",
+	"parserSource": "parser.cpp",
+	"lexerHeader": "lexer.hpp",
+	"lexerSource": "lexer.cpp",
+	"ASTHeader": "ast.hpp",
+	"visitorHeader": "visitor.hpp",
+	"namespace": "c_lang",
+	"tab": "    ",
+	
+	"nodeNamePattern": {
+		"namespace" : "ast",
+		"prefix": "",
+		"postfix": "_node"
+	},
+	
+	"memberPattern": {
+		"prefix": "",
+		"postfix": ""
+	},
+	
+	"nodeType": {
+		"prefix": "std::unique_ptr<",
+		"postfix": ">"
+	},
+	
+	"temporaryVarPattern": {
+		"prefix": "",
+		"postfix": "_t"
+	},
+
+	"parserClassName": "parser",
+	"parserMethodPattern": { 
+		"prefix": "parse_",
+		"postfix": ""
+	},
+	"parserRequire": "require",
+	"parserMatch": "match",
+	"parserMatching": "matching",
+	"parserCurrentToken": "current_token",
+	"parserPosition": "parser_pos",
+	"parserTokens": "tokens",
+
+	"tokenTypeEnumName": "token_type",
+	"tokenType": "Token_t",
+	"tokenTypeRef": "token",
+	"tokenListType": "token_list",
+	"nullToken": "null_token",
+
+	"containerPattern": {
+		"prefix": "std::vector<",
+		"postfix": ">"
+	}
+}

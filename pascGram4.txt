@@ -1,0 +1,30 @@
+Program(Name, Block) ::= "program" "\w":Name ";" Block:Block "." .
+
+Block(Decls, Compound) ::= Declaration*:Decls Compound:Compound .
+
+Declaration^ ::= (VarDecl^ | ProcDecl^) ";" .
+
+VarDecl(Ids, Type) ::= "var" "\w"+:Ids "colon" "\w":Type .
+
+ProcDecl(Name, Block) ::= "procedure" "\w":Name [ "("   ")" ] ";"
+		 	 Block:Block .
+
+Compound(Statements) ::= "begin" Statement*:Statements "end" .
+
+Statement^ ::= (CompoundStatement^ | AssignmentStatement^ | ProcCallStatement^)
+		   	   ";" .
+
+CompoundStatement(Statements) ::= "begin" Statement*:Statements "end" .
+
+AssignmentStatement(Var, Expr) ::= "\w":Var ":=" Expr:Expr .
+
+ProcCallStatement(ProcName, Args) ::= "\w":ProcName "(" Expr*:Args ")" .
+
+Expr ::= (Term | Term ("+" | "-") Expr) .
+
+Term ::= (Factor | Factor ( "/" | "*" | "%" ) Term) .
+
+Factor ::= ( "\i"
+            | "\f"
+            | "+" Factor
+            | "-" Factor ) .

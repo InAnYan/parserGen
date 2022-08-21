@@ -1,0 +1,25 @@
+program(decls) ::= declaration*:decls "EOF" .
+
+declaration^ ::= (varDecl^ | statement^) .
+
+varDecl(name, initializer) ::= "var" "\w":name ["=" expression:initializer] .
+
+statement^ ::= (printStmt^ | blockStmt^ | ifStmt^ | exprStatement^) .
+printStmt(expr) ::= "print" expression:expr ";" .
+exprStatement(expr) ::= expression:expr ";" .
+blockStmt(decls) ::= "{" declaration*:decls "}" .
+ifStmt(condition, trueStmt, falseStmt) ::= "if" "(" expression:condition ")" statement:trueStmt ["else" statement:falseStmt] .
+
+expression^ ::= expressionComma^ .
+expressionComma ::= EXPR_LEFT_ASOC(assignment, ",").
+
+assignment ::= (logic_or | logic_or "=" assignment ).
+logic_or ::= logic_and "or" logic_and .
+logic_and ::= equality "and" equality .
+equality ::= ternary ("==" | "!=") ternary .
+ternary ::= comparison "?" comparison ":" ternary .
+comparison ::= term (">=" | ">" | "<" | "<=") term .
+term ::= factor ("+" | "-") factor .
+factor ::= unary ("*" | "/" | "%") unary .
+unary ::= (("+" | "-" | "!") unary | primary ).
+primary ::= ("\i" | "\w" | "true" | "false" | "(" expression ")") .
