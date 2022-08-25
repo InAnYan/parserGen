@@ -1,12 +1,13 @@
 import sys
 
-from src import Style, Tokens
+from src import Style, Tokens, GlobalArgs
 from src.Parser import Parser
 
 if len(sys.argv) == 2 or len(sys.argv) > 3:
     print('ERROR: Wrong arguments count.\nUsage: script.py fileName styleFile')
 else:
     Style.init(sys.argv[2])
+    GlobalArgs.init(sys.argv)
 
     with open(sys.argv[1], 'r') as fin:
         source = fin.read()
@@ -42,16 +43,15 @@ else:
 
     Style.write(Style.parser_name() + '(' + Style.token_list() + ' tokens);')
     Style.write('')
-
-    for decl in decls:
-        Style.write(Style.node_type(decl.name) + ' ' + Style.parse(decl.name) + '();')
-    Style.write('')
     Style.tabLevel -= 1
     Style.write('private:')
     Style.tabLevel += 1
+    for decl in decls:
+        Style.write(Style.node_type(decl.name) + ' ' + Style.parse(decl.name) + '();')
+    Style.write('')
     Style.write(Style.token_list() + ' ' + Style.member(Style.parser_tokens()) + ';')
     Style.write('size_t ' + Style.member(Style.parser_pos()) + ';')
-    Style.write(Style.token() + ' ' + Style.null_token() + ' = { ' + Style.token_type('NONE') + ', "", 0 };')
+    Style.write('const ' + Style.token() + ' ' + Style.null_token() + ' = { ' + Style.token_type('NONE') + ', "", 0 };')
     Style.write('')
 
     Style.write(Style.require_decl())

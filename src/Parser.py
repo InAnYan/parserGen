@@ -119,4 +119,58 @@ class Parser:
 
             decls.append(Declaration(name.text, jobs, args, self_return))
 
-        return decls
+        return check_for_expressions(decls)
+
+
+def check_for_expressions(decls: [Declaration]) -> [Declaration]:
+    for decl in decls:
+        if len(decl.jobs) != 1:
+            continue
+
+        main_job = decl.jobs[0]
+
+        if not isinstance(main_job, VariantJob):
+            continue
+
+        if len(main_job.variants) != 2:
+            continue
+
+        if not (len(main_job.variants[0]) == 1 and len(main_job.variants[1]) == 3 or
+                len(main_job.variants[1]) == 1 and len(main_job.variants[0]) == 3):
+            continue
+
+        primary_job = main_job.variants[0][0] if len(main_job.variants[0]) == 1 else main_job.variants[1][0]
+        expr_job = main_job.variants[0] if len(main_job.variants[0]) == 3 else main_job.variants[1]
+
+        if not isinstance(primary_job, MethodJob):
+            continue
+
+        if not isinstance(expr_job[0], MethodJob) or not isinstance(expr_job[2], MethodJob):
+            continue
+
+        final_job_job = primary_job.method_name
+        final_job_operators = []
+
+        if isinstance(expr_job[1], TokenJob):
+            final_job_operators.append(expr_job[1].token)
+        elif isinstance(expr_job[1], VariantJob):
+            to_continue = False
+            for e in expr_job[1].variants:
+                if len(e) != 1 or not isinstance(e[0], TokenJob):
+                    to_continue = True
+                    break
+                else:
+                    final_job_operators.append(e[0].token)
+            if to_continue:
+                continue
+        else:
+            continue
+
+        if expr_job[0].method_name == decl.name:
+            decl.jobs = [ExprLeftAsoc(decl.name, final_job_job, final_job_operators)]
+        elif expr_job[2].method_name == decl.name:
+            decl.jobs = [ExprRightAsoc(decl.name, final_job_job, final_job_operators)]
+        else:
+            continue
+
+    return decls

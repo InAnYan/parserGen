@@ -7,6 +7,11 @@ buf: str = ''
 inited: bool = False
 
 
+def unsafe_init():
+    global inited
+    inited = True
+
+
 def init(file_name: str):
     global inited
     global file_style
@@ -35,7 +40,7 @@ def flush() -> str:
     return temp
 
 
-def write(string: str):
+def write(string: str = ''):
     assert inited
     global buf
     buf += (file_style['tab'] * tabLevel) + string + '\n'
@@ -129,19 +134,29 @@ def token_ref() -> str:
 
 def require_decl(definition: bool = False) -> str:
     assert inited
-    return token_ref() + ' ' + file_style['parserClassName'] + '::' + file_style['parserRequire'] + '(' + token_type() + ' type)' + (
-        ';' if not definition else '')
+    if definition:
+        return token_ref() + ' ' + file_style['parserClassName'] + '::' + file_style['parserRequire'] \
+               + '(' + token_type() + ' type)'
+    else:
+        return token_ref() + ' ' + file_style['parserRequire'] + '(' + token_type() + ' type);'
 
 
 def match_decl(definition: bool = False) -> str:
     assert inited
-    return token_ref() + ' ' + file_style['parserClassName'] + '::' + file_style['parserMatch'] + '(' + token_type() + ' type)' + (
-        ';' if not definition else '')
+    if definition:
+        return token_ref() + ' ' + file_style['parserClassName'] + '::' + file_style['parserMatch'] + '(' \
+               + token_type() + ' type)'
+    else:
+        return token_ref() + ' ' + file_style['parserMatch'] + '(' + token_type() + ' type);'
 
 
 def matching_decl(definition: bool = False) -> str:
     assert inited
-    return 'bool ' + file_style['parserClassName'] + '::' + file_style['parserMatching'] + '(' + token_type() + ' type)' + (';' if not definition else '')
+    if definition:
+        return 'bool ' + file_style['parserClassName'] + '::' + file_style['parserMatching'] + '(' \
+               + token_type() + ' type)'
+    else:
+        return 'bool ' + file_style['parserMatching'] + '(' + token_type() + ' type);'
 
 
 def current_token_decl(definition: bool = False) -> str:
@@ -178,11 +193,11 @@ def undo_namespace():
 
     if namespace():
         tabLevel -= 1
-        write('} // ' + namespace())
+        write('} // namespace ' + namespace())
 
     if global_namespace():
         tabLevel -= 1
-        write('} // ' + global_namespace())
+        write('} // namespace ' + global_namespace())
 
 
 def start_block():
@@ -193,12 +208,12 @@ def start_block():
     tabLevel += 1
 
 
-def end_block():
+def end_block(end: str = ''):
     global tabLevel
     assert tabLevel != 0
 
     tabLevel -= 1
-    write('}')
+    write('}' + end)
 
 
 def match(tok_type: str, literally: bool = False) -> str:
@@ -266,6 +281,11 @@ def matching(what: str) -> str:
     return file_style['parserMatching'] + '(' + token_type(what) + ')'
 
 
+def matching_args(what: str) -> str:
+    assert inited
+    return file_style['parserMatching'] + '(' + what + ')'
+
+
 def previous_token(offset: int = 0) -> str:
     assert inited
     return file_style['parserPreviousToken'] + '(' + (str(offset) if offset != 0 else '') + ')'
@@ -279,3 +299,27 @@ def abstract_node_type() -> str:
 def node_namespace() -> str:
     assert inited
     return
+
+
+def publics():
+    assert inited
+    global tabLevel
+    tabLevel -= 1
+    write('public:')
+    tabLevel += 1
+
+
+def privates():
+    assert inited
+    global tabLevel
+    tabLevel -= 1
+    write('private:')
+    tabLevel += 1
+
+
+def protecteds():
+    assert inited
+    global tabLevel
+    tabLevel -= 1
+    write('protected:')
+    tabLevel += 1

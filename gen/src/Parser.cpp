@@ -1,300 +1,290 @@
 #include <pscpch.hpp>
 #include <Parser.hpp>
 
-namespace Pascal
+namespace Lox
 {
     Parser::Parser(TokenList tokens)
         : m_Tokens(tokens)
     { }
     
-    std::unique_ptr<AST::programNode> Parser::parseprogram()
+    std::unique_ptr<AST::ProgramNode> Parser::parseProgram()
     {
-        std::vector<std::unique_ptr<AST::declarationNode>> t_decls;
+        std::vector<std::unique_ptr<AST::DeclarationNode>> t_Decls;
         
         while (!matching(TokenType::EOF))
         {
-            t_decls.push_back(parsedeclaration());
+            t_Decls.push_back(parseDeclaration());
         }
         
-        return std::make_unique<AST::programNode>(
-            std::move(t_decls)
+        return std::make_unique<AST::ProgramNode>(
+            std::move(t_Decls)
         );
     }
     
-    std::unique_ptr<AST::declarationNode> Parser::parsedeclaration()
+    std::unique_ptr<AST::DeclarationNode> Parser::parseDeclaration()
     {
-        std::unique_ptr<AST::declarationNode> t_declaration = nullptr;
+        std::unique_ptr<AST::DeclarationNode> t_Declaration = nullptr;
         
-        if (matching(TokenType::VAR))
+        if (currentToken().type == TokenType::VAR)
         {
-            t_declaration = parsevarDecl();
+            t_Declaration = parseVarDecl();
         }
         else
         {
-            t_declaration = parsestatement();
+            t_Declaration = parseStatement();
         }
         
-        return std::move(t_declaration);
+        return std::move(t_Declaration);
     }
     
-    std::unique_ptr<AST::varDeclNode> Parser::parsevarDecl()
+    std::unique_ptr<AST::VarDeclNode> Parser::parseVarDecl()
     {
-        Token_t t_name;
-        std::unique_ptr<AST::expressionNode> t_initializer;
+        Token_t t_Name;
+        std::unique_ptr<AST::ExpressionNode> t_Initializer;
         
-        t_name = require(TokenType::IDENTIFIER);
+        require(TokenType::VAR);
+        t_Name = require(TokenType::IDENTIFIER);
         if (matching(TokenType::EQUALS))
         {
-            t_initializer = parseexpression();
+            t_Initializer = parseExpression();
         }
         
-        return std::make_unique<AST::varDeclNode>(
-            std::move(t_name), 
-            std::move(t_initializer)
+        return std::make_unique<AST::VarDeclNode>(
+            std::move(t_Name), 
+            std::move(t_Initializer)
         );
     }
     
-    std::unique_ptr<AST::statementNode> Parser::parsestatement()
+    std::unique_ptr<AST::StatementNode> Parser::parseStatement()
     {
-        std::unique_ptr<AST::statementNode> t_statement = nullptr;
+        std::unique_ptr<AST::StatementNode> t_Statement = nullptr;
         
-        if (matching(TokenType::PRINT))
+        if (currentToken().type == TokenType::PRINT)
         {
-            t_statement = parseprintStmt();
+            t_Statement = parsePrintStmt();
         }
-        else if (matching(TokenType::OPEN_FIGURE))
+        else if (currentToken().type == TokenType::OPEN_FIGURE)
         {
-            t_statement = parseblockStmt();
+            t_Statement = parseBlockStmt();
         }
-        else if (matching(TokenType::IF))
+        else if (currentToken().type == TokenType::IF)
         {
-            t_statement = parseifStmt();
+            t_Statement = parseIfStmt();
         }
         else
         {
-            t_statement = parseexprStatement();
+            t_Statement = parseExprStmt();
         }
         
-        return std::move(t_statement);
+        return std::move(t_Statement);
     }
     
-    std::unique_ptr<AST::printStmtNode> Parser::parseprintStmt()
+    std::unique_ptr<AST::PrintStmtNode> Parser::parsePrintStmt()
     {
-        std::unique_ptr<AST::expressionNode> t_expr;
+        std::unique_ptr<AST::ExpressionNode> t_Expr;
         
-        t_expr = parseexpression();
+        require(TokenType::PRINT);
+        t_Expr = parseExpression();
         require(TokenType::SEMICOLON);
         
-        return std::make_unique<AST::printStmtNode>(
-            std::move(t_expr)
+        return std::make_unique<AST::PrintStmtNode>(
+            std::move(t_Expr)
         );
     }
     
-    std::unique_ptr<AST::exprStatementNode> Parser::parseexprStatement()
+    std::unique_ptr<AST::ExprStmtNode> Parser::parseExprStmt()
     {
-        std::unique_ptr<AST::expressionNode> t_expr;
+        std::unique_ptr<AST::ExpressionNode> t_Expr;
         
-        t_expr = parseexpression();
+        t_Expr = parseExpression();
         require(TokenType::SEMICOLON);
         
-        return std::make_unique<AST::exprStatementNode>(
-            std::move(t_expr)
+        return std::make_unique<AST::ExprStmtNode>(
+            std::move(t_Expr)
         );
     }
     
-    std::unique_ptr<AST::blockStmtNode> Parser::parseblockStmt()
+    std::unique_ptr<AST::BlockStmtNode> Parser::parseBlockStmt()
     {
-        std::vector<std::unique_ptr<AST::declarationNode>> t_decls;
+        std::vector<std::unique_ptr<AST::DeclarationNode>> t_decls;
         
+        require(TokenType::OPEN_FIGURE);
         while (!matching(TokenType::CLOSE_FIGURE))
         {
-            t_decls.push_back(parsedeclaration());
+            t_decls.push_back(parseDeclaration());
         }
         
-        return std::make_unique<AST::blockStmtNode>(
+        return std::make_unique<AST::BlockStmtNode>(
             std::move(t_decls)
         );
     }
     
-    std::unique_ptr<AST::ifStmtNode> Parser::parseifStmt()
+    std::unique_ptr<AST::IfStmtNode> Parser::parseIfStmt()
     {
-        std::unique_ptr<AST::expressionNode> t_condition;
-        std::unique_ptr<AST::statementNode> t_trueStmt;
-        std::unique_ptr<AST::statementNode> t_falseStmt;
+        std::unique_ptr<AST::ExpressionNode> t_Condition;
+        std::unique_ptr<AST::StatementNode> t_TrueStmt;
+        std::unique_ptr<AST::StatementNode> t_FalseStmt;
         
+        require(TokenType::IF);
         require(TokenType::OPEN_PAREN);
-        t_condition = parseexpression();
+        t_Condition = parseExpression();
         require(TokenType::CLOSE_PAREN);
-        t_trueStmt = parsestatement();
+        t_TrueStmt = parseStatement();
         if (matching(TokenType::ELSE))
         {
-            t_falseStmt = parsestatement();
+            t_FalseStmt = parseStatement();
         }
         
-        return std::make_unique<AST::ifStmtNode>(
-            std::move(t_condition), 
-            std::move(t_trueStmt), 
-            std::move(t_falseStmt)
+        return std::make_unique<AST::IfStmtNode>(
+            std::move(t_Condition), 
+            std::move(t_TrueStmt), 
+            std::move(t_FalseStmt)
         );
     }
     
-    std::unique_ptr<AST::expressionNode> Parser::parseexpression()
+    std::unique_ptr<AST::ExpressionNode> Parser::parseExpression()
     {
-        std::unique_ptr<AST::expressionNode> t_expression = nullptr;
+        std::unique_ptr<AST::ExpressionNode> t_Expression = nullptr;
         
-        t_expression = parseexpressionComma();
+        t_Expression = parseExpressionComma();
         
-        return std::move(t_expression);
+        return std::move(t_Expression);
     }
     
-    std::unique_ptr<AST::expressionCommaNode> Parser::parseexpressionComma()
+    std::unique_ptr<AST::ExpressionCommaNode> Parser::parseExpressionComma()
     {
-        std::unique_ptr<AST::NodeNode> left = parseassignment;
+        std::unique_ptr<AST::NodeNode> left = parseAssignmentExpr();
         
-        while (matching(TokenType::TokenType::COMMA))
+        while (matching(TokenType::COMMA))
         {
             Token op = previousToken();
-            std::unique_ptr<AST::NodeNode> right = parseassignment;
-            left = std::make_unique<AST::expressionCommaNode>(std::move(left), op, std::move(right);
+            std::unique_ptr<AST::NodeNode> right = parseAssignmentExpr();
+            left = std::make_unique<AST::ExpressionCommaNode>(std::move(left), op, std::move(right);
         }
         
         return left;
-        
-        return std::make_unique<AST::expressionCommaNode>(
-        );
     }
     
-    std::unique_ptr<AST::assignmentNode> Parser::parseassignment()
+    std::unique_ptr<AST::AssignmentExprNode> Parser::parseAssignmentExpr()
     {
-        if (currentToken().type == TokenType::PLUS || currentToken().type == TokenType::MINUS || currentToken().type == TokenType::BANG || currentToken().type == TokenType::INT_LITERAL || currentToken().type == TokenType::IDENTIFIER || currentToken().type == TokenType::TRUE || currentToken().type == TokenType::FALSE || currentToken().type == TokenType::OPEN_PAREN)
+        std::unique_ptr<AST::NodeNode> left = parseTernaryExpr();
+        
+        if (matching(TokenType::EQUALS))
         {
-            parselogic_or();
-        }
-        else
-        {
-            parselogic_or();
-            require(TokenType::EQUALS);
-            parseassignment();
+            Token op = previousToken();
+            std::unique_ptr<AST::NodeNode> right = parseAssignmentExpr();
+            return std::make_unique<AST::AssignmentExprNode>(std::move(left), op, std::move(right));
         }
         
-        return std::make_unique<AST::assignmentNode>(
-        );
+        return left;
     }
     
-    std::unique_ptr<AST::logic_orNode> Parser::parselogic_or()
+    std::unique_ptr<AST::TernaryExprNode> Parser::parseTernaryExpr()
     {
-        parselogic_and();
-        require(TokenType::OR);
-        parselogic_and();
+        std::unique_ptr<AST::LogicOrExprNode> t_MainExpr;
+        std::unique_ptr<AST::LogicOrExprNode> t_TrueExpr;
         
-        return std::make_unique<AST::logic_orNode>(
-        );
-    }
-    
-    std::unique_ptr<AST::logic_andNode> Parser::parselogic_and()
-    {
-        parseequality();
-        require(TokenType::AND);
-        parseequality();
-        
-        return std::make_unique<AST::logic_andNode>(
-        );
-    }
-    
-    std::unique_ptr<AST::equalityNode> Parser::parseequality()
-    {
-        parseternary();
-        if (currentToken().type == TokenType::EQUALS_EQUALS)
-        {
-            require(TokenType::EQUALS_EQUALS);
-        }
-        else
-        {
-            require(TokenType::BANG_EQUALS);
-        }
-        parseternary();
-        
-        return std::make_unique<AST::equalityNode>(
-        );
-    }
-    
-    std::unique_ptr<AST::ternaryNode> Parser::parseternary()
-    {
-        parsecomparison();
+        t_MainExpr = parseLogicOrExpr();
         require(TokenType::QUESTION);
-        parsecomparison();
+        t_TrueExpr = parseLogicOrExpr();
         require(TokenType::COLON);
-        parseternary();
+        t_FalseExpr = parseTernaryExpr();
         
-        return std::make_unique<AST::ternaryNode>(
+        return std::make_unique<AST::TernaryExprNode>(
+            std::move(t_MainExpr), 
+            std::move(t_TrueExpr), 
+            std::move(t_FalseExpr)
         );
     }
     
-    std::unique_ptr<AST::comparisonNode> Parser::parsecomparison()
+    std::unique_ptr<AST::LogicOrExprNode> Parser::parseLogicOrExpr()
     {
-        parseterm();
-        if (currentToken().type == TokenType::GREATER_EQUALS)
-        {
-            require(TokenType::GREATER_EQUALS);
-        }
-        else if (currentToken().type == TokenType::GREATER)
-        {
-            require(TokenType::GREATER);
-        }
-        else if (currentToken().type == TokenType::LESS)
-        {
-            require(TokenType::LESS);
-        }
-        else
-        {
-            require(TokenType::LESS_EQUALS);
-        }
-        parseterm();
+        std::unique_ptr<AST::NodeNode> left = parseLogicAndExpr();
         
-        return std::make_unique<AST::comparisonNode>(
-        );
+        while (matching(TokenType::OR))
+        {
+            Token op = previousToken();
+            std::unique_ptr<AST::NodeNode> right = parseLogicAndExpr();
+            left = std::make_unique<AST::LogicOrExprNode>(std::move(left), op, std::move(right);
+        }
+        
+        return left;
     }
     
-    std::unique_ptr<AST::termNode> Parser::parseterm()
+    std::unique_ptr<AST::LogicAndExprNode> Parser::parseLogicAndExpr()
     {
-        parsefactor();
-        if (currentToken().type == TokenType::PLUS)
-        {
-            require(TokenType::PLUS);
-        }
-        else
-        {
-            require(TokenType::MINUS);
-        }
-        parsefactor();
+        std::unique_ptr<AST::NodeNode> left = parseEqualityExpr();
         
-        return std::make_unique<AST::termNode>(
-        );
+        while (matching(TokenType::AND))
+        {
+            Token op = previousToken();
+            std::unique_ptr<AST::NodeNode> right = parseEqualityExpr();
+            left = std::make_unique<AST::LogicAndExprNode>(std::move(left), op, std::move(right);
+        }
+        
+        return left;
     }
     
-    std::unique_ptr<AST::factorNode> Parser::parsefactor()
+    std::unique_ptr<AST::EqualityExprNode> Parser::parseEqualityExpr()
     {
-        parseunary();
-        if (currentToken().type == TokenType::ASTERISK)
-        {
-            require(TokenType::ASTERISK);
-        }
-        else if (currentToken().type == TokenType::DIVISION)
-        {
-            require(TokenType::DIVISION);
-        }
-        else
-        {
-            require(TokenType::PERCENT);
-        }
-        parseunary();
+        std::unique_ptr<AST::NodeNode> left = parseComparisonExpr();
         
-        return std::make_unique<AST::factorNode>(
-        );
+        while (matching(TokenType::EQUALS_EQUALS, TokenType::BANG_EQUALS))
+        {
+            Token op = previousToken();
+            std::unique_ptr<AST::NodeNode> right = parseComparisonExpr();
+            left = std::make_unique<AST::EqualityExprNode>(std::move(left), op, std::move(right);
+        }
+        
+        return left;
     }
     
-    std::unique_ptr<AST::unaryNode> Parser::parseunary()
+    std::unique_ptr<AST::ComparisonExprNode> Parser::parseComparisonExpr()
     {
+        std::unique_ptr<AST::NodeNode> left = parseTermExpr();
+        
+        while (matching(TokenType::GREATER_EQUALS, TokenType::GREATER, TokenType::LESS, TokenType::LESS_EQUALS))
+        {
+            Token op = previousToken();
+            std::unique_ptr<AST::NodeNode> right = parseTermExpr();
+            left = std::make_unique<AST::ComparisonExprNode>(std::move(left), op, std::move(right);
+        }
+        
+        return left;
+    }
+    
+    std::unique_ptr<AST::TermExprNode> Parser::parseTermExpr()
+    {
+        std::unique_ptr<AST::NodeNode> left = parseFactorExpr();
+        
+        while (matching(TokenType::PLUS, TokenType::MINUS))
+        {
+            Token op = previousToken();
+            std::unique_ptr<AST::NodeNode> right = parseFactorExpr();
+            left = std::make_unique<AST::TermExprNode>(std::move(left), op, std::move(right);
+        }
+        
+        return left;
+    }
+    
+    std::unique_ptr<AST::FactorExprNode> Parser::parseFactorExpr()
+    {
+        std::unique_ptr<AST::NodeNode> left = parseUnaryExpr();
+        
+        while (matching(TokenType::ASTERISK, TokenType::DIVISION, TokenType::PERCENT))
+        {
+            Token op = previousToken();
+            std::unique_ptr<AST::NodeNode> right = parseUnaryExpr();
+            left = std::make_unique<AST::FactorExprNode>(std::move(left), op, std::move(right);
+        }
+        
+        return left;
+    }
+    
+    std::unique_ptr<AST::UnaryExprNode> Parser::parseUnaryExpr()
+    {
+        std::unique_ptr<AST::PrimaryExprNode> t_Expr;
+        
         if (currentToken().type == TokenType::PLUS || currentToken().type == TokenType::MINUS || currentToken().type == TokenType::BANG)
         {
             if (currentToken().type == TokenType::PLUS)
@@ -309,18 +299,20 @@ namespace Pascal
             {
                 require(TokenType::BANG);
             }
-            parseunary();
+            t_Expr = parseUnaryExpr();
         }
         else
         {
-            parseprimary();
+            t_Expr = parsePrimaryExpr();
         }
         
-        return std::make_unique<AST::unaryNode>(
+        return std::make_unique<AST::UnaryExprNode>(
+            std::move(t_Op), 
+            std::move(t_Expr)
         );
     }
     
-    std::unique_ptr<AST::primaryNode> Parser::parseprimary()
+    std::unique_ptr<AST::PrimaryExprNode> Parser::parsePrimaryExpr()
     {
         if (currentToken().type == TokenType::INT_LITERAL)
         {
@@ -341,11 +333,11 @@ namespace Pascal
         else
         {
             require(TokenType::OPEN_PAREN);
-            parseexpression();
+            parseExpression();
             require(TokenType::CLOSE_PAREN);
         }
         
-        return std::make_unique<AST::primaryNode>(
+        return std::make_unique<AST::PrimaryExprNode>(
         );
     }
     
@@ -384,5 +376,5 @@ namespace Pascal
         else return nullToken;
     }
     
-} // Pascal
+} // Lox
 

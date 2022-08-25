@@ -1,25 +1,25 @@
-program(decls) ::= declaration*:decls "EOF" .
+Program(Decls) ::= Declaration*:Decls "EOF" .
 
-declaration^ ::= (varDecl^ | statement^) .
+Declaration^ ::= (VarDecl^ | Statement^) .
 
-varDecl(name, initializer) ::= "var" "\w":name ["=" expression:initializer] .
+VarDecl(Name, Initializer) ::= "var" "\w":Name ["=" Expression:Initializer] .
 
-statement^ ::= (printStmt^ | blockStmt^ | ifStmt^ | exprStatement^) .
-printStmt(expr) ::= "print" expression:expr ";" .
-exprStatement(expr) ::= expression:expr ";" .
-blockStmt(decls) ::= "{" declaration*:decls "}" .
-ifStmt(condition, trueStmt, falseStmt) ::= "if" "(" expression:condition ")" statement:trueStmt ["else" statement:falseStmt] .
+Statement^ ::= (PrintStmt^ | BlockStmt^ | IfStmt^ | ExprStmt^) .
+PrintStmt(Expr) ::= "print" Expression:Expr ";" .
+ExprStmt(Expr) ::= Expression:Expr ";" .
+BlockStmt(decls) ::= "{" Declaration*:decls "}" .
+IfStmt(Condition, TrueStmt, FalseStmt) ::= "if" "(" Expression:Condition ")" Statement:TrueStmt ["else" Statement:FalseStmt] .
 
-expression^ ::= expressionComma^ .
-expressionComma ::= EXPR_LEFT_ASOC(assignment, ",").
+Expression^ ::= ExpressionComma^ .
+ExpressionComma ::= EXPR_LEFT_ASOC(AssignmentExpr, ",").
 
-assignment ::= (logic_or | logic_or "=" assignment ).
-logic_or ::= logic_and "or" logic_and .
-logic_and ::= equality "and" equality .
-equality ::= ternary ("==" | "!=") ternary .
-ternary ::= comparison "?" comparison ":" ternary .
-comparison ::= term (">=" | ">" | "<" | "<=") term .
-term ::= factor ("+" | "-") factor .
-factor ::= unary ("*" | "/" | "%") unary .
-unary ::= (("+" | "-" | "!") unary | primary ).
-primary ::= ("\i" | "\w" | "true" | "false" | "(" expression ")") .
+AssignmentExpr ::= (TernaryExpr | TernaryExpr "=" AssignmentExpr ).
+TernaryExpr(MainExpr, TrueExpr, FalseExpr) ::= LogicOrExpr:MainExpr "?" LogicOrExpr:TrueExpr ":" TernaryExpr:FalseExpr .
+LogicOrExpr ::= (LogicAndExpr | LogicOrExpr "or" LogicAndExpr) .
+LogicAndExpr ::= (EqualityExpr | LogicAndExpr "and" EqualityExpr) .
+EqualityExpr ::= (ComparisonExpr | EqualityExpr ("==" | "!=") ComparisonExpr) .
+ComparisonExpr ::= (TermExpr | ComparisonExpr (">=" | ">" | "<" | "<=") TermExpr) .
+TermExpr ::= (FactorExpr  | TermExpr ("+" | "-") FactorExpr) .
+FactorExpr ::= (UnaryExpr | FactorExpr ("*" | "/" | "%") UnaryExpr) .
+UnaryExpr(Op, Expr) ::= (("+" | "-" | "!"):Op UnaryExpr:Expr | PrimaryExpr:Expr ).
+PrimaryExpr ::= ("\i" | "\w" | "true" | "false" | "(" Expression ")") .

@@ -1,0 +1,41 @@
+Stmt : {
+    Expression : Expr expr
+    VarDecl : Token_t name, Expr initializer
+    Block : std::vector<Stmt> statements
+    If : Expr condition, Stmt trueStmt, Stmt falseStmt
+    While : Expr condition, Stmt body
+    DoWhile : Expr condition, Stmt body
+    For : Stmt initializer, Expr condition, Expr increment, Stmt body
+    Break : Token_t keyword
+    Continue : Token_t keyword
+    Print : Expr value
+    Return : Token_t keyword, Expr value
+    FunctionDecl : Token_t name, std::vector<Token_t> params, std::vector<Stmt> body, bool isStatic, bool isGetter
+    ClassDecl : Token_t name, std::vector<FunctionDeclStmt> methods, VarExprNode superClass
+    Import : std::vector<Token_t> path
+
+
+Expr : {
+    Literal : Token_t value
+    Var : Token_t name
+    Group : Expr expr
+    Unary : Token_t operation, Expr expr
+    PostIncrement : Token_t operation, VarExpr var
+    PreIncrement : Token_t operation, VarExpr var
+    Binary : Expr left, Token_t operation , Expr right
+    Ternary : Expr mainExpr, Expr trueExpr, Expr falseExpr
+    Assign : VarExpr lvalue, Token_t operation, Expr rvalue
+    Logical : Expr left, Token_t operation, Expr right
+    Call : Expr callee, Token_t closeParen, std::vector<Expr> args
+    Lambda : std::vector<Token_t> params, std::vector<Stmt> body
+    Get : Expr object, VarExpr name
+    Set : Expr object, VarExpr name, Token_t operation, Expr value
+    ListLiteral : std::vector<Expr> elements
+    Index : Expr object, Expr index, Token_t openBracket
+    Super : Token_t keyword, Token_t method
+
+*GraphDot : draw, draw
+*UsedInitialized : check, check
+*Resolver^ : resolve, resolve
+*IllegalControlFlow : check, check
+*Interpreter : execute, evaluate

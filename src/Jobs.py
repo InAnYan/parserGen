@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from src.Tokens import Token
+from src import GlobalArgs
 from . import Style
 
 
@@ -181,7 +182,9 @@ class VariantJob(Job):
             if_str = 'if (' if i == 0 else 'else if ('
 
             if len(self.variants[i]) == 1 and isinstance(self.variants[i][0], MethodJob) \
-                    and not global_decls[self.variants[i][0].method_name].jobs[0].save_res and isinstance(global_decls[self.variants[i][0].method_name].jobs[0], TokenJob):
+                    and not global_decls[self.variants[i][0].method_name].jobs[0].save_res \
+                    and isinstance(global_decls[self.variants[i][0].method_name].jobs[0], TokenJob) \
+                    and GlobalArgs.fast_j_cm():
                 first_tok_to_match = global_decls[self.variants[i][0].method_name].jobs[0]
                 global_decls[self.variants[i][0].method_name].jobs.pop(0)
                 if_str += Style.matching(first_tok_to_match.token)
@@ -256,12 +259,12 @@ class ExprLeftAsoc(Job):
         self.operators = new_operators
 
     def generate(self, global_decls):
-        Style.write(Style.abstract_node_type() + ' left = ' + Style.parse(self.job) + ';')
+        Style.write(Style.abstract_node_type() + ' left = ' + Style.parse(self.job) + '();')
         Style.write('')
-        Style.write('while (' + Style.matching(self.operators) + ')')
+        Style.write('while (' + Style.matching_args(self.operators) + ')') # TODO: Check for end
         Style.start_block()
         Style.write(Style.token_ref() + ' op = ' + Style.previous_token() + ';')
-        Style.write(Style.abstract_node_type() + ' right = ' + Style.parse(self.job) + ';')
+        Style.write(Style.abstract_node_type() + ' right = ' + Style.parse(self.job) + '();')
         Style.write('left = std::make_unique<' + Style.node(self.parent) +
                     '>(std::move(left), op, std::move(right);')
         Style.end_block()
@@ -273,3 +276,52 @@ class ExprLeftAsoc(Job):
 
     def get_tokens(self, global_decls, pos: int = 0) -> [Token]:
         return []
+
+
+class ExprRightAsoc(Job):
+    def __init__(self, parent: str, job: str, operators: [str]):
+        super().__init__(parent)
+        self.job = job
+        self.operators = []
+        for e in operators:
+            self.operators.append(Style.token_type(e))
+        new_operators = ""
+        for e in self.operators:
+            if e != self.operators[-1]:
+                new_operators += e + ', '
+            else:
+                new_operators += e
+        self.operators = new_operators
+
+    def generate(self, global_decls):
+        Style.write(Style.abstract_node_type() + ' left = ' + Style.parse(self.job) + '();')
+        Style.write('')
+        Style.write('if (' + Style.matching_args(self.operators) + ')')
+        Style.start_block()
+        Style.write(Style.token_ref() + ' op = ' + Style.previous_token() + ';')
+        Style.write(Style.abstract_node_type() + ' right = ' + Style.parse(self.parent) + '();')
+        Style.write('return std::make_unique<' + Style.node(self.parent) + '>(std::move(left), op, std::move(right));')
+        Style.end_block()
+        Style.write('')
+        Style.write('return left;')
+
+    def get_temps(self) -> [str]:
+        return []
+
+    def get_tokens(self, global_decls, pos: int = 0) -> [Token]:
+        return []
+
+
+class SelfReturnJob(Job):
+    def __init__(self, parent: str, jobs: [Job]):
+        super().__init__(parent)
+        self.jobs = jobs
+
+    def get_temps(self) -> [str]:
+        return []
+
+    def get_tokens(self, global_decls, pos: int = 0) -> [Token]:
+        return []
+
+    def generate(self, global_decls):
+        pass

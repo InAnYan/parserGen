@@ -7,7 +7,7 @@
 	"lexerSource": "Lexer.cpp",
 	"ASTHeader": "AST.hpp",
 	"visitorHeader": "Visitor.hpp",
-	"namespace": "Pascal",
+	"namespace": "Lox",
 	"tab": "    ",
 	"abstractNode": "Node",
 	

@@ -1,4 +1,4 @@
-from src.Jobs import Job
+from src.Jobs import Job, ExprLeftAsoc, ExprRightAsoc
 from . import Style
 
 
@@ -37,6 +37,9 @@ class Declaration:
 
         for job in self.jobs:
             job.generate(jobsList)
+
+        if len(self.jobs) == 1 and (isinstance(self.jobs[0], ExprLeftAsoc) or isinstance(self.jobs[0], ExprRightAsoc)):
+            return
 
         Style.write('')
 

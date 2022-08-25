@@ -1,51 +1,51 @@
-#ifndef PASCAL_PARSER_HPP_DEFINED
-#define PASCAL_PARSER_HPP_DEFINED
+#ifndef LOX_PARSER_HPP_DEFINED
+#define LOX_PARSER_HPP_DEFINED
 
 #include <memory>
 
 #include <Lexer.hpp>
 #include <AST.hpp>
 
-namespace Pascal
+namespace Lox
 {
     class Parser
     {
     public:
         Parser(TokenList tokens);
         
-        std::unique_ptr<AST::programNode> parseprogram();
-        std::unique_ptr<AST::declarationNode> parsedeclaration();
-        std::unique_ptr<AST::varDeclNode> parsevarDecl();
-        std::unique_ptr<AST::statementNode> parsestatement();
-        std::unique_ptr<AST::printStmtNode> parseprintStmt();
-        std::unique_ptr<AST::exprStatementNode> parseexprStatement();
-        std::unique_ptr<AST::blockStmtNode> parseblockStmt();
-        std::unique_ptr<AST::ifStmtNode> parseifStmt();
-        std::unique_ptr<AST::expressionNode> parseexpression();
-        std::unique_ptr<AST::expressionCommaNode> parseexpressionComma();
-        std::unique_ptr<AST::assignmentNode> parseassignment();
-        std::unique_ptr<AST::logic_orNode> parselogic_or();
-        std::unique_ptr<AST::logic_andNode> parselogic_and();
-        std::unique_ptr<AST::equalityNode> parseequality();
-        std::unique_ptr<AST::ternaryNode> parseternary();
-        std::unique_ptr<AST::comparisonNode> parsecomparison();
-        std::unique_ptr<AST::termNode> parseterm();
-        std::unique_ptr<AST::factorNode> parsefactor();
-        std::unique_ptr<AST::unaryNode> parseunary();
-        std::unique_ptr<AST::primaryNode> parseprimary();
-        
     private:
+        std::unique_ptr<AST::ProgramNode> parseProgram();
+        std::unique_ptr<AST::DeclarationNode> parseDeclaration();
+        std::unique_ptr<AST::VarDeclNode> parseVarDecl();
+        std::unique_ptr<AST::StatementNode> parseStatement();
+        std::unique_ptr<AST::PrintStmtNode> parsePrintStmt();
+        std::unique_ptr<AST::ExprStmtNode> parseExprStmt();
+        std::unique_ptr<AST::BlockStmtNode> parseBlockStmt();
+        std::unique_ptr<AST::IfStmtNode> parseIfStmt();
+        std::unique_ptr<AST::ExpressionNode> parseExpression();
+        std::unique_ptr<AST::ExpressionCommaNode> parseExpressionComma();
+        std::unique_ptr<AST::AssignmentExprNode> parseAssignmentExpr();
+        std::unique_ptr<AST::TernaryExprNode> parseTernaryExpr();
+        std::unique_ptr<AST::LogicOrExprNode> parseLogicOrExpr();
+        std::unique_ptr<AST::LogicAndExprNode> parseLogicAndExpr();
+        std::unique_ptr<AST::EqualityExprNode> parseEqualityExpr();
+        std::unique_ptr<AST::ComparisonExprNode> parseComparisonExpr();
+        std::unique_ptr<AST::TermExprNode> parseTermExpr();
+        std::unique_ptr<AST::FactorExprNode> parseFactorExpr();
+        std::unique_ptr<AST::UnaryExprNode> parseUnaryExpr();
+        std::unique_ptr<AST::PrimaryExprNode> parsePrimaryExpr();
+        
         TokenList m_Tokens;
         size_t m_ParserPos;
-        Token_t nullToken = { TokenType::NONE, "", 0 };
+        const Token_t nullToken = { TokenType::NONE, "", 0 };
         
-        Token Parser::require(TokenType type);
-        Token Parser::match(TokenType type);
-        bool Parser::matching(TokenType type);
+        Token require(TokenType type);
+        Token match(TokenType type);
+        bool matching(TokenType type);
         
         Token currentToken(size_t offset = 0);
     } // Parser
-} // Pascal
+} // Lox
 
-#endif // PASCAL_PARSER_HPP_DEFINED
+#endif // LOX_PARSER_HPP_DEFINED
 
